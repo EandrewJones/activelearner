@@ -275,8 +275,11 @@ class TextDataset(Dataset):
     def elmo(self, *args, **kwargs):
         """
         """
+        import tensorflow.compat.v1 as tf
+        physical_devices = tf.config.list_physical_devices()
+        
         # Check if tensorflow finds GPU
-        if 'GPU' not in str(device_lib.list_local_devices()):
+        if 'GPU' not in str(physical_devices):
             # Warn user
             warnings.warn(
                 'GPU device not found. The is a very computationally expensive model. The use of an accelerator is recommended to avoid reaching resource limits.', 
@@ -297,34 +300,34 @@ class TextDataset(Dataset):
             
         # configure tensorflow options
         tf.disable_eager_execution()
-        gpus = tf.config.experimental.list_physical_devices('GPU')
-        if gpus:
-            try:
-                # Currently, memory growth needs to be the same across GPUs
-                for gpu in gpus:
-                    tf.config.experimental.set_memory_growth(gpu, True)
-                logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-                print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-            except RuntimeError as e:
-                # Memory growth must be set before GPUs have been initialized
-                print(e)
-                
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-        
-        # download model from tensorflow hub
-        elmo = hub.Module("https://tfhub.dev/google/elmo/3", trainable=True)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3,
+                            allow_growth=True)
+        config = tf.ConfigProto(gpu_options=gpu_options)
         
         docs = []
         for doc in self._X:
             doc = preprocess(doc)
             docs.append(doc)
-            
-        embeddings = elmo(
-            docs,
-            signature='default',
-            as_dict=True
-        )['elmo']
+        inputs = (x for x in docs) 
         
+        # TODO slow, need better batch implementation
+        with hub.eval_function_for_module("https://tfhub.dev/google/elmo/3") as f:
+            batch_out = np.zeros((len(docs), 1024))
+            for item in inputs:
+                batch_in = np.array(item)
+                batch_out.append(f(batch_in), axis = 0)
+                
+
+        # download model from tensorflow hub
+        #elmo = hub.Module("https://tfhub.dev/google/elmo/3", trainable=True)
+        
+            
+        #embeddings = elmo(
+        #    docs,
+        #    signature='default',
+        #    as_dict=True
+        #)['elmo']
+    
         
 #===========#
 # Functions #
