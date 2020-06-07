@@ -1,15 +1,3 @@
-"""
-Labeler
-
-This module incluedes a concrete class interface for asking the
-oracle for the correct label
-"""
-
-import matplotlib.pyplot as plt
-from six.moves import input
-
-from activelearner.interfaces import Labeler
-from activelearner.utils import inherit_docstring_from
 
 '''
 Interactive Labeler
@@ -18,6 +6,12 @@ Interactive Labeler
 This module includes a means of asking the Oracle for the
 correct label.
 '''
+
+import matplotlib.pyplot as plt
+from six.moves import input
+
+from activelearner.interfaces import Labeler
+from activelearner.utils import inherit_docstring_from
 
 
 class AskOracle(Labeler):
