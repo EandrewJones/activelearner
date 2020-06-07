@@ -272,59 +272,6 @@ class TextDataset(Dataset):
 
         self._X = doc_vecs
         
-    def elmo(self, *args, **kwargs):
-        """
-        """
-        # Check if tensorflow finds GPU
-        if 'GPU' not in str(device_lib.list_local_devices()):
-            # Warn user
-            warnings.warn(
-                'GPU device not found. The is a very computationally expensive model. The use of an accelerator is recommended to avoid reaching resource limits.', 
-                ResourceWarning
-                )
-            
-            # ask user to contiue 
-            banner = 'Would you like to continue anyways? [(Y)es/(N)o]: '
-            valid_input = set(['Yes', 'Y', 'y', 'yes', 'No', 'N', 'n', 'no'])
-            continue_options = set(['Yes', 'Y', 'y', 'yes'])
-            
-            user_choice = input(banner)
-            
-            while user_choice not in valid_input:
-                print(f'Invalid choice. Must be one of {valid_input}')
-                user_choice = input(banner)
-            if user_choice not in continue_options: return
-            
-        # configure tensorflow options
-        tf.disable_eager_execution()
-        gpus = tf.config.experimental.list_physical_devices('GPU')
-        if gpus:
-            try:
-                # Currently, memory growth needs to be the same across GPUs
-                for gpu in gpus:
-                    tf.config.experimental.set_memory_growth(gpu, True)
-                logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-                print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-            except RuntimeError as e:
-                # Memory growth must be set before GPUs have been initialized
-                print(e)
-                
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-        
-        # download model from tensorflow hub
-        elmo = hub.Module("https://tfhub.dev/google/elmo/3", trainable=True)
-        
-        docs = []
-        for doc in self._X:
-            doc = preprocess(doc)
-            docs.append(doc)
-            
-        embeddings = elmo(
-            docs,
-            signature='default',
-            as_dict=True
-        )['elmo']
-        
         
 #===========#
 # Functions #
