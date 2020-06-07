@@ -54,7 +54,7 @@ setup(
               'activelearner.strategies', 
               'activelearner.utils'
               ],
-    package_dir=[
+    package_dir={
         'activelearner': 'activelearner',
         'activelearner.dataset': 'activelearner/dataset',
         'activelearner.interfaces': 'activelearner/interfaces',
@@ -62,7 +62,7 @@ setup(
         'activelearner.models': 'activelearner/models',
         'activelearner.strategies': 'activelearner/strategies',
         'activelearner.utils': 'activelearner/utils'
-    ]
+    }
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
