@@ -9,7 +9,6 @@ import pandas as pd
 import scipy.sparse as sp
 
 from six import with_metaclass
-from six.moves import input
 from abc import ABCMeta, abstractmethod
 import matplotlib.pyplot as plt
 
