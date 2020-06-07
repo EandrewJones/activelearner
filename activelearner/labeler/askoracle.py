@@ -1,3 +1,9 @@
+"""
+Labeler
+
+This module incluedes a concrete class interface for asking the
+oracle for the correct label
+"""
 
 import matplotlib.pyplot as plt
 from six.moves import input

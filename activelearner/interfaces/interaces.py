@@ -1,3 +1,9 @@
+
+'''
+Base interfaces for active learner
+The package works according to the (abstract) inferfaces defined below
+'''
+
 from __future__ import print_function
 from __future__ import unicode_literals
 import sys
@@ -10,12 +16,7 @@ import scipy.sparse as sp
 
 from six import with_metaclass
 from abc import ABCMeta, abstractmethod
-import matplotlib.pyplot as plt
 
-'''
-Base interfaces for active learner
-The package works according to the (abstract) inferfaces defined below
-'''
 
 #=========#
 # Classes #
