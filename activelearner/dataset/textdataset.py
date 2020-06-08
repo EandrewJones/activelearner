@@ -29,6 +29,7 @@ from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
 from keras_preprocessing.text import text_to_word_sequence
 
+from activelearner.interfaces import Dataset
 
 #=========#
 # Classes #
