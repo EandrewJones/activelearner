@@ -20,7 +20,7 @@ __author__ = """Evan Andrew Jones"""
 __email__ = 'evan.a.jones3@gmail.com'
 __version__ = '0.1.0'
 
-import activelearner.datasset
+import activelearner.dataset
 import activelearner.interfaces
 import activelearner.labeler
 import activelearner.models
