@@ -2,3 +2,4 @@
 myenv/
 *.log
 *.txt
+activelearner.egg-info/

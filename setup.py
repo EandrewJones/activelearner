@@ -10,8 +10,6 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-# with open('requirements_dev.txt') as f:
-#     requirements = f.read().splitlines()
 requirements = [ ]
 
 setup_requirements = [ ]
