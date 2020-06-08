@@ -2,7 +2,7 @@
 Random Sampling
 '''
 from activelearner.interfaces import Query
-from activelearners.utils import inherit_docstring_from, seed_random_state
+from activelearner.utils import inherit_docstring_from, seed_random_state
 
 
 class RandomSampling(Query):
