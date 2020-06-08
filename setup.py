@@ -10,9 +10,9 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-with open('requirements_dev.txt') as f:
-    requirements = f.read().splitlines()
-install_requirements = requirements
+# with open('requirements_dev.txt') as f:
+#     requirements = f.read().splitlines()
+install_requirements = [ ]
 
 setup_requirements = [ ]
 
@@ -45,23 +45,24 @@ setup(
     include_package_data=True,
     keywords='activelearner',
     name='activelearner',
-    packages=['activelearner', 
-              'activelearner.dataset', 
-              'activelearner.interfaces', 
-              'activelearner.labeler', 
-              'activelearner.models', 
-              'activelearner.strategies', 
-              'activelearner.utils'
-              ],
-    package_dir={
-        'activelearner': 'activelearner',
-        'activelearner.dataset': 'activelearner/dataset',
-        'activelearner.interfaces': 'activelearner/interfaces',
-        'activelearner.labeler': 'activelearner/labeler',
-        'activelearner.models': 'activelearner/models',
-        'activelearner.strategies': 'activelearner/strategies',
-        'activelearner.utils': 'activelearner/utils'
-    },
+    packages=find_packages(include=['activelearner', 'activelearner.*']),
+    # packages=['activelearner', 
+    #           'activelearner.dataset', 
+    #           'activelearner.interfaces', 
+    #           'activelearner.labeler', 
+    #           'activelearner.models', 
+    #           'activelearner.strategies', 
+    #           'activelearner.utils'
+    #           ],
+    # package_dir={
+    #     'activelearner': 'activelearner',
+    #     'activelearner.dataset': 'activelearner/dataset',
+    #     'activelearner.interfaces': 'activelearner/interfaces',
+    #     'activelearner.labeler': 'activelearner/labeler',
+    #     'activelearner.models': 'activelearner/models',
+    #     'activelearner.strategies': 'activelearner/strategies',
+    #     'activelearner.utils': 'activelearner/utils'
+    # },
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
