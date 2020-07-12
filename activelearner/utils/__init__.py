@@ -3,8 +3,8 @@ import pickle
 import numpy as np
 
 
-__all__ = ['inherit_docstring_from', 'seed_random_state', 'calc_cost', 'save_object', 
-           'ceildiv']
+__all__ = ['inherit_docstring_from', 'seed_random_state', 'calc_cost', 'save_object',
+           'update_progress', 'ceildiv']
 
 # Decorator function for classes to inherit docstrings from cls
 def inherit_docstring_from(cls):
@@ -28,17 +28,17 @@ def seed_random_state(seed):
         return seed
     raise ValueError("%r cannot be used to generate numpy.random.RandomState"
                      "instance" % seed)
-    
+
 
 # Function to calculate cost/loss for label preditions
 def calc_cost(y, yhat, cost_matrix):
     """
     Calculate the cost with given cost matrix
-    
+
     y: ground truth
-    
+
     yhat: prediction
-    
+
     cost_matrix: array-like, shape=(n_classes, n_classes)
         The ith row, jth column represents the cost of the ground truth being
         ith class and prediction as jth class
@@ -46,16 +46,51 @@ def calc_cost(y, yhat, cost_matrix):
     return np.mean(cost_matrix[list(y), list(yhat)])
 
 
+# Function to display progress bar
+def update_progress(progress):
+    '''
+    Displays or updates a console progress bar
+
+    Arguments
+    ---------
+    Progress: float
+        A float value between 0 and 1. Any int will be converted
+        to float. A value < 0 indicates a 'halt'. 1 or bigger
+        indicates 'completion'.
+
+    Returns
+    -------
+    command-line progress bar
+    '''
+    barLength = 40 # modify to change length of progress bar
+    status = ""
+    if isinstance(progress, int):
+        progress = float(progress)
+    if not isinstance(progress, float):
+        progress = 0
+        status = 'error: progress var must be a float\r\n'
+    if progress < 0:
+        progress = 0
+        status = 'Halt...\r\n'
+    if progress > 1:
+        progress = 1
+        status = 'Done...\r\n'
+    block = int(round(barLength*progress))
+    text = '\rProgress: [{0}] {1}% {2}\r\n'.format("="*block + " "*(barLength-block), round(progress*100, 2), status)
+    sys.stdout.write(text)
+    sys.stdout.flush()
+
+
 # Function to save (pickle) python objects
 def save_object(obj, filename):
     '''
     Saves python objects to specified filename. Will
     overwrite file
-    
+
     Arguments
     ---------
     obj: python object
-    
+
     filename: file path + name
     '''
     with open(filename, 'wb') as output:

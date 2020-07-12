@@ -25,6 +25,14 @@ import activelearner.interfaces
 import activelearner.labeler
 import activelearner.models
 import activelearner.strategies
+import activelearner
 
-__all__ = ['dataset', 'interfaces', 'labeler', 'models', 'strategies']
+__all__ = [
+    'dataset',
+    'interfaces',
+    'labeler',
+    'models',
+    'strategies',
+    'activelearner'
+    ]
 

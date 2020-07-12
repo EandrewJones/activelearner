@@ -13,6 +13,7 @@ import tensorflow_hub as hub
 
 import numpy as np
 import re
+import psutil
 
 import scipy.sparse as sp
 from scipy.spatial import ConvexHull
