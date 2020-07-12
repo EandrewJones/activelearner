@@ -6,3 +6,9 @@ activelearner.egg-info/
 tests/
 dist/
 build/
+.editorconfig
+Makefile
+Pipfile
+Pipfile.lock
+setup.cfg
+tox.ini
