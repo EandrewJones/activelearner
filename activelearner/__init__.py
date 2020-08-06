@@ -26,6 +26,8 @@ import activelearner.labeler
 import activelearner.models
 import activelearner.strategies
 import activelearner
+import activelearner.utils
+
 
 __all__ = [
     'dataset',
@@ -34,5 +36,6 @@ __all__ = [
     'models',
     'strategies',
     'activelearner'
+    'utils'
     ]
 

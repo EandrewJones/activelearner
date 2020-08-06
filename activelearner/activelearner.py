@@ -1,8 +1,15 @@
 """Main module."""
 import warnings
+import os
+import sys
+import re
+
+from six.moves import input
+
+from activelearner import dataset, models, strategies, labeler, utils
 
 # Main function loop for active_learner algorithm
-def run_active_learner(dataset, querier, feature_type, label_name,
+def run_active_learner(data, querier, feature_type, label_name,
                        save_every=20, print_progress=True, **kwargs):
     '''
     Runs main active learning algorithm loop, prompting Oracle for correct label and
@@ -62,9 +69,19 @@ def run_active_learner(dataset, querier, feature_type, label_name,
     seed = kwargs.pop('seed', 1)
 
     # Argument checking
-    assert dataset is not None
-    assert model is not None
-    assert querier is not None
+    if not isinstance(data, dataset.textdataset.TextDataset) and \
+        not isinstance(data, dataset.imagedataset.ImageDataset):
+            raise TypeError("data must be of class TextDataset or ImageDataset from dataset submodule.")
+    strategy_class = re.compile("activelearner.strategies")
+    assert re.search(strategy_class, str(type(querier))), "querier must be of class 'UncertaintySampling', 'QUIRE', 'QueryByCommittee' or 'RandomSampling'"
+    assert isinstance(save_every, int), "save_every must be a positive integer."
+    assert save_every > 0, "save_every must be a positive integer."
+    assert isinstance(print_progress, bool), "print_progress must be a boolean."
+    assert isinstance(path, str), "path must be a string."
+    assert isinstance(seed, int), "seed must be a integer."
+    assert isinstance(file_name, str), "file_name must be a string."
+    if feature_name is not None:
+        assert isinstance(feature_name, str), "feature_name must be a string."
     assert feature_type in ['text', 'image']
     if feature_type != 'text' and keywords is not None:
         warnings.warn("feature_type is not 'text', keywords will be ignored.")
@@ -73,20 +90,12 @@ def run_active_learner(dataset, querier, feature_type, label_name,
             assert isinstance(word, str)
 
     for name in label_name:
-        assert isinstance(name, str)
-
-    assert isinstance(save_every, int) and save_every > 0
-    assert isinstance(print_progress, bool)
-    assert isinstance(path, str)
-    assert isinstance(seed, int)
-    assert isinstance(file_name, str)
-    if feature_name is not None:
-        assert isinstance(feature_name, str)
+        assert isinstance(name, str), "label_name must be a string or list of strings."
 
     # Instantiate oracle
-    oracle = AskOracle(feature_type=feature_type,
-                       label_name=label_name,
-                       feature_name=feature_name)
+    oracle = labeler.AskOracle(feature_type=feature_type,
+                               label_name=label_name,
+                               feature_name=feature_name)
 
     # Model loop
     continue_cycle = True
@@ -94,9 +103,9 @@ def run_active_learner(dataset, querier, feature_type, label_name,
         # active learning algorithm loop
         for _ in range(save_every):
             query_id = querier.make_query()
-            label = oracle.label(dataset.view[query_id],
+            label = oracle.label(data.view[query_id],
                                  keywords=keywords)
-            dataset.update(query_id, label)
+            data.update(query_id, label)
 
             progress = (_ + 1) / save_every
             if progress % 5 == 0:
@@ -104,11 +113,11 @@ def run_active_learner(dataset, querier, feature_type, label_name,
 
         # Print updated class information
         if print_progress:
-            dataset.get_dataset_stats()
+            data.get_dataset_stats()
 
         # Save dataset object
         fname = os.path.join(path, '', file_name)
-        save_object(obj=dataset, filename=fname)
+        utils.save_object(obj=data, filename=fname)
 
         # ask user to input continue cycle
         banner = f'Would you like to continue labeling another {save_every} examples? [(Y)es/(N)o]: '
