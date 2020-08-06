@@ -46,41 +46,6 @@ def calc_cost(y, yhat, cost_matrix):
     return np.mean(cost_matrix[list(y), list(yhat)])
 
 
-# Function to display progress bar
-def update_progress(progress):
-    '''
-    Displays or updates a console progress bar
-
-    Arguments
-    ---------
-    Progress: float
-        A float value between 0 and 1. Any int will be converted
-        to float. A value < 0 indicates a 'halt'. 1 or bigger
-        indicates 'completion'.
-
-    Returns
-    -------
-    command-line progress bar
-    '''
-    barLength = 40 # modify to change length of progress bar
-    status = ""
-    if isinstance(progress, int):
-        progress = float(progress)
-    if not isinstance(progress, float):
-        progress = 0
-        status = 'error: progress var must be a float\r\n'
-    if progress < 0:
-        progress = 0
-        status = 'Halt...\r\n'
-    if progress > 1:
-        progress = 1
-        status = 'Done...\r\n'
-    block = int(round(barLength*progress))
-    text = '\rProgress: [{0}] {1}% {2}\r\n'.format("="*block + " "*(barLength-block), round(progress*100, 2), status)
-    sys.stdout.write(text)
-    sys.stdout.flush()
-
-
 # Function to save (pickle) python objects
 def save_object(obj, filename):
     '''

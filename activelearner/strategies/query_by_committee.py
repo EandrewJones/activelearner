@@ -94,12 +94,12 @@ class QueryByCommittee(Query):
                     )
 
         random_state = kwargs.pop('random_state', None)
-        self.random_state_ = np.random.RandomState(random_state)
+        self.random_state_ = seed_random_state(random_state)
 
         self.students = list()
         for model in models:
             if isinstance(model, str):
-                self.students.append(getattr(activeLearner.models, model)())
+                self.students.append(getattr(activelearner.models, model)())
             else:
                 self.students.append(model)
         self.n_students = len(self.students)
@@ -133,7 +133,7 @@ class QueryByCommittee(Query):
                 disagreement[-1] -= lab_count[lab] / self.n_students * \
                     math.log(float(lab_count[lab]) / self.n_students)
 
-            return disagreement
+        return disagreement
 
     def _kl_divergence_disagreement(self, proba):
         """
@@ -180,21 +180,18 @@ class QueryByCommittee(Query):
         self.teach_students()
 
     @inherit_docstring_from(Query)
-    def make_query(self, top_n=1):
+    def make_query(self):
         dataset = self.dataset
         unlabeled_entry_ids, X_pool = dataset.get_unlabeled_entries()
 
         if self.disagreement == 'vote':
             # Let the trained students vote for unlabeled data
-            votes = np.zeroes((len(X_pool), len(self.students)))
+            votes = np.zeros((len(X_pool), len(self.students)))
             for i, student in enumerate(self.students):
                 votes[:, i] = student.predict(X_pool)
 
             vote_entropy = self._vote_disagreement(votes)
-            ask_idx = self.random_state_.choice(
-                np.where(np.isclose(vote_entropy, np.max(vote_entropy)))[0],
-                size=top_n
-            )
+            ask_idx = self.random_state_.choice(np.where(np.isclose(vote_entropy, np.max(vote_entropy)))[0])
 
         elif self.disagreement == 'kl_divergence':
             proba = []
@@ -203,10 +200,7 @@ class QueryByCommittee(Query):
             proba = np.array(proba).transpose(1, 0, 2).astype(float)
 
             avg_kl = self._kl_divergence_disagreement(proba)
-            ask_idx = self.random_state_.choice(
-                np.where(np.isclose(avg_kl, np.max(avg_kl)))[0],
-                size=top_n
-            )
+            ask_idx = self.random_state_.choice(np.where(np.isclose(avg_kl, np.max(avg_kl)))[0])
 
         return unlabeled_entry_ids[ask_idx]
 
