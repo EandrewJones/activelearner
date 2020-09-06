@@ -6,6 +6,7 @@ activelearner.egg-info/
 tests/
 dist/
 build/
+cuda-devices
 .editorconfig
 Makefile
 Pipfile
