@@ -5,32 +5,20 @@ Text Dataset
 This module includes an implementation of the dataset class
 for text-type datasets with additional methods for feature engineering.
 '''
-from absl import logging
-
-from tensorflow.python.client import device_lib
-import tensorflow.compat.v1 as tf
-import tensorflow_hub as hub
-
 import numpy as np
 import re
 import psutil
-
 import scipy.sparse as sp
 from scipy.spatial import ConvexHull
-
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.decomposition import NMF
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-
 from spacy.lang.en.stop_words import STOP_WORDS
-
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-
 from keras_preprocessing.text import text_to_word_sequence
-
 from activelearner.interfaces import Dataset
 
 #=========#
@@ -433,7 +421,7 @@ def tsne_anchor(qbar, init_dims=50, perplexity=30, **kwargs):
 
 
 def gensim_read_corpus(docs, tokens_only=False):
-    '''rads corpus into gensim format'''
+    '''reads corpus into gensim format'''
     for i, doc in enumerate(docs):
         doc = preprocess(doc)
         tokens = text_to_word_sequence(doc)

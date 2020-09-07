@@ -109,20 +109,16 @@ class UncertaintySampling(Query):
             score = np.sum(-dvalue * np.log(dvalue), axis=1)
         return zip(unlabeled_entry_ids, score)
 
-    def make_query(self, top_n=1, return_score=False):
+    def make_query(self, return_score=False):
         """
-        Return the index(es) of the sample to be queried and labeled. Optionally:
-        a) query more than one example per training round; and b) return selection
-        score(s) of for each sample(batch). Read-only.
+        Return the index of the sample to be queried and labeled. Optionally:
+        return selection scor of for each sample. Read-only.
 
         No modification to the internal states.
 
 
         Parameters
         ----------
-        top_n: int, optional (default=1)
-            The number of samples to query per training round.
-
         return_score: bool, optional, (default=False)
             Return the associated uncertainty score for each query sample.
 
@@ -136,10 +132,7 @@ class UncertaintySampling(Query):
             Selection score of unlabaled entries, the larger the better (more confident)
         """
         unlabeled_entry_ids, scores = zip(*self._get_scores())
-        if top_n == 1:
-            ask_id = np.argmax(scores)
-        elif top_n > 1:
-            ask_id = np.argpartition(scores, -top_n)[-top_n:][::-1]
+        ask_id = np.argmax(scores)
 
         if return_score:
             return unlabeled_entry_ids[ask_id], list(zip(unlabeled_entry_ids, scores))
