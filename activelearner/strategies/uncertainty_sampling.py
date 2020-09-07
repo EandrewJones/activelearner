@@ -126,7 +126,7 @@ class UncertaintySampling(Query):
         Returns
         -------
         ask_id: int
-            The index of the next top_n unlabaled samples to be queried and labeled.
+            The index of the next unlabeled samples to be queried and labeled.
 
         score: list of (index, score) tuples
             Selection score of unlabaled entries, the larger the better (more confident)
