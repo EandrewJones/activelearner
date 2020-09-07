@@ -8,8 +8,71 @@ from six.moves import input
 
 from activelearner import dataset, models, strategies, labeler, utils
 
-# Main function loop for active_learner algorithm
-def run_active_learner(data, querier, feature_type, label_name,
+
+# Define active learning labeling modes
+def interactive_mode(data, keywords, querier, oracle, save_every, 
+                     path, file_name, print_progress):
+    '''Implements loop for interactive labeling.'''
+    # Start interactive loop that retrains model every iteration
+    continue_cycle = True
+    while continue_cycle:
+        for _ in range(save_every):
+            query_id = querier.make_query()
+            label = oracle.label(data.view[query_id],
+                                 keywords=keywords)
+            data.update(query_id, label)
+
+            progress = (_ + 1) / save_every
+            if progress % 5 == 0:
+                update_progress(progress)
+
+        # Print updated class information
+        if print_progress:
+            data.get_dataset_stats()
+
+        # Save dataset object
+        fname = os.path.join(path, '', file_name)
+        utils.save_object(obj=data, filename=fname)
+
+        # ask user to input continue cycle
+        banner = f'Would you like to continue labeling another {save_every} examples? [(Y)es/(N)o]: '
+        valid_input = set(['Yes', 'Y', 'y', 'yes', 'No', 'N', 'n', 'no'])
+        continue_options = set(['Yes', 'Y', 'y', 'yes'])
+
+        user_choice = input(banner)
+
+        while user_choice not in valid_input:
+            print(f'Invalid choice. Must be one of {valid_input}')
+            user_choice = input(banner)
+        continue_cycle = user_choice in continue_options
+
+
+def batch_mode(data, keywords, querier, oracle, save_every, 
+               path, file_name, print_progress):
+    '''Implements loop for batch labeling.'''
+    # Get batch of ids to query
+    query_ids = querier.make_query()
+    
+    # Query oracle for labels
+    for _, query_id in enumerate(query_ids):
+        label = oracle.label(data.view[query_id],
+                                 keywords=keywords)
+        data.update(query_id, label)
+
+        progress = (_ + 1) / len(query_ids)
+        if print_progress and progress % save_every == 0:
+            # show progress
+            update_progress(progress)
+            data.get_dataset_stats()
+            
+            # save progress
+            print('Saving progress...')
+            fname = os.path.join(path, '', file_name)
+            utils.save_object(obj=data, filename=fname)     
+    
+
+# Main function for active_learner algorithm
+def run_active_learner(mode, data, querier, feature_type, label_name,
                        save_every=20, print_progress=True, **kwargs):
     '''
     Runs main active learning algorithm loop, prompting Oracle for correct label and
@@ -17,13 +80,17 @@ def run_active_learner(data, querier, feature_type, label_name,
 
     Parameters
     ----------
+    mode: string
+        Sets the labeling mode. Currently support 'batch' or 'interactive'.
+    
     dataset: dataset object
         Must be activelearner dataset object containing features X and labels Y.
         Current verision only supports TextDataset class.
 
     querier: query strategy object
         Must be activelearner query strategy object of type 'QueryByCommittee',
-        'QUIRE', 'RandomSampling', or 'UncertaintySampling'.
+        'QUIRE', 'RandomSampling', 'UncertaintySampling', or 'BatchUncertaintySampling.
+        `BatchUncertaintySampling` only works with `batch` mode and vice versa.
 
     feature_type: string
         Identifies the data structure of the feature. Must be either
@@ -69,11 +136,13 @@ def run_active_learner(data, querier, feature_type, label_name,
     seed = kwargs.pop('seed', 1)
 
     # Argument checking
+    # TODO implement type checking version of entire packed
+    assert mode in ['batch', 'interactive'], "Mode must be one of ['batch', 'interactive']"
     if not isinstance(data, dataset.textdataset.TextDataset) and \
         not isinstance(data, dataset.imagedataset.ImageDataset):
             raise TypeError("data must be of class TextDataset or ImageDataset from dataset submodule.")
     strategy_class = re.compile("activelearner.strategies")
-    assert re.search(strategy_class, str(type(querier))), "querier must be of class 'UncertaintySampling', 'QUIRE', 'QueryByCommittee' or 'RandomSampling'"
+    assert re.search(strategy_class, str(type(querier))), "querier must be of class 'BatchUncertaintySampling', 'UncertaintySampling', 'QUIRE', 'QueryByCommittee' or 'RandomSampling'"
     assert isinstance(save_every, int), "save_every must be a positive integer."
     assert save_every > 0, "save_every must be a positive integer."
     assert isinstance(print_progress, bool), "print_progress must be a boolean."
@@ -97,37 +166,12 @@ def run_active_learner(data, querier, feature_type, label_name,
                                label_name=label_name,
                                feature_name=feature_name)
 
-    # Model loop
-    continue_cycle = True
-    while continue_cycle:
-        # active learning algorithm loop
-        for _ in range(save_every):
-            query_id = querier.make_query()
-            label = oracle.label(data.view[query_id],
-                                 keywords=keywords)
-            data.update(query_id, label)
-
-            progress = (_ + 1) / save_every
-            if progress % 5 == 0:
-                update_progress(progress)
-
-        # Print updated class information
-        if print_progress:
-            data.get_dataset_stats()
-
-        # Save dataset object
-        fname = os.path.join(path, '', file_name)
-        utils.save_object(obj=data, filename=fname)
-
-        # ask user to input continue cycle
-        banner = f'Would you like to continue labeling another {save_every} examples? [(Y)es/(N)o]: '
-        valid_input = set(['Yes', 'Y', 'y', 'yes', 'No', 'N', 'n', 'no'])
-        continue_options = set(['Yes', 'Y', 'y', 'yes'])
-
-        user_choice = input(banner)
-
-        while user_choice not in valid_input:
-            print(f'Invalid choice. Must be one of {valid_input}')
-            user_choice = input(banner)
-        continue_cycle = user_choice in continue_options
-
+    # Run interactive model
+    if mode == 'interactive':
+        interactive_mode(data=data, keywords=keywords, querier=querier,
+                         oracle=oracle, save_every=save_every, path=path,
+                         file_name=file_name, print_progress=print_progress)
+    if mode == 'batch':
+        batch_mode(data=data, keywords=keywords, querier=querier,
+                   oracle=oracle, save_every=save_every, path=path,
+                   file_name=file_name, print_progress=print_progress)

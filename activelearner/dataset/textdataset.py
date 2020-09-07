@@ -34,8 +34,8 @@ class TextDataset(Dataset):
     for:
         1) BoW
         2) doc2vec
-        3) Universal Sentence Embeddings (DAN) (tensorflow)
-        4) elmo (tensorflow)
+        
+        # TODO implement a range of options useing sentence-transformers package
 
     Parameters
     ----------
