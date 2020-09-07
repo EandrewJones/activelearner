@@ -11,5 +11,4 @@ cuda-devices
 Makefile
 Pipfile
 Pipfile.lock
-setup.cfg
 tox.ini
