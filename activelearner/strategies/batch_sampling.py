@@ -4,10 +4,16 @@ Batch Sampling
 This module contains a class that implements ranked batch uncertainty sampling.
 '''
 import numpy as np
-import scipy.sparse as sp
 import psutil
-from sklearn.metrics.pairwise import pairwise_distances, pairwise_distances_argmin_min
-from activealearner.interfaces import Query, ContinuousModel, ProbabilisticModel
+from sklearn.metrics.pairwise import (
+    pairwise_distances,
+    pairwise_distances_argmin_min
+)
+from activealearner.interfaces import (
+    Query,
+    ContinuousModel,
+    ProbabilisticModel
+)
 
 
 class BatchUncertaintySampling(Query):
@@ -18,22 +24,25 @@ class BatchUncertaintySampling(Query):
     
     Parameters
     ----------
-    model: :py:class:`ContinuousModel` or :py:class:`ProbabilisticModel` object instance.
+    model: :py:class:`ContinuousModel` or :py:class:`ProbabilisticModel`
         The base model used for training
         
     method: {'lc', 'sm', 'entropy'}, optional (default='lc')
-        least confidence (lc), queries instance whose posterior probability of being postive
-            is nearest 0.5 (for binary classification);
-        smallest margin (sm), it queries the instance whose posterior probability gap between the
-            most and second most probable labels is minimal;
-        entropy, requires :py:class:`ProbabilisticModel` to be passed in as model parameter;
+        least confidence (lc), queries instance whose posterior probability
+            of being postive is nearest 0.5 (for binary classification);
+        smallest margin (sm), it queries the instance whose posterior
+            probability gap between the most and second most probable
+            labels is minimal;
+        entropy, requires :py:class:`ProbabilisticModel` to be passed in as
+            model parameter;
 
     metric: string, default = 'euclidean'
-        Metric used to calculate similarity scores. One of [‘cityblock’, ‘cosine’, 
-        ‘euclidean’, ‘l1’, ‘l2’, ‘manhattan’, braycurtis’, ‘canberra’, ‘chebyshev’, 
-        ‘correlation’, ‘dice’, ‘hamming’, ‘jaccard’, ‘kulsinski’, ‘mahalanobis’,
-        ‘minkowski’, ‘rogerstanimoto’, ‘russellrao’, ‘seuclidean’, 
-        ‘sokalmichener’, ‘sokalsneath’, ‘sqeuclidean’, ‘yule’].
+        Metric used to calculate similarity scores. One of [‘cityblock’,
+        ‘cosine’, ‘euclidean’, ‘l1’, ‘l2’, ‘manhattan’, braycurtis’,
+        ‘canberra’, ‘chebyshev’, ‘correlation’, ‘dice’, ‘hamming’,
+        ‘jaccard’, ‘kulsinski’, ‘mahalanobis’, ‘minkowski’,
+        ‘rogerstanimoto’, ‘russellrao’, ‘seuclidean’, ‘sokalmichener’,
+        ‘sokalsneath’, ‘sqeuclidean’, ‘yule’].
         This parameter is passed to :func:`~sklearn.metrics.pairwise.pairwise_distances`.
     
     batch_size: int, default = 100
@@ -56,7 +65,7 @@ class BatchUncertaintySampling(Query):
     """
     
     def __init__(self, *args, **kwargs):
-        super(BatchSampling, self).__init__(*args, **kwargs)
+        super(BatchUncertaintySampling, self).__init__(*args, **kwargs)
         
         self.model = kwargs.pop('model', None)
         if self.model is None:
@@ -64,10 +73,10 @@ class BatchUncertaintySampling(Query):
                 "__init__() missing required keyword-only argument: 'model'"
             )
         if not isinstance(self.model, ContinuousModel) and \
-            not isinstance(self.model, ProbabilisticModel):
-                raise TypeError(
+                not isinstance(self.model, ProbabilisticModel):
+            raise TypeError(
                     "model has to be a ContinuousModel or ProbabilisticModel"
-                )
+            )
                 
         self.method = kwargs.pop('method', 'lc')
         if self.method not in ['lc', 'sm', 'entropy']:
@@ -77,10 +86,10 @@ class BatchUncertaintySampling(Query):
             )
 
         if self.method == 'entropy' and \
-            not isinstance(self.model, ProbabilisticModel):
-                raise TypeError(
-                    "method 'entropy' requires model to be a ProbabilisticModel"
-                )
+                not isinstance(self.model, ProbabilisticModel):
+            raise TypeError(
+                "method 'entropy' requires model to be a ProbabilisticModel"
+            )
 
         self.metric = kwargs.pop('metric', 'euclidean')
         allowed_metrics = ['cityblock', 'cosine', 'euclidean', 'l1', 
@@ -92,7 +101,8 @@ class BatchUncertaintySampling(Query):
                            'yule']
         if self.metric not in allowed_metrics:
             raise TypeError(
-                "metric not allowed. See documentation for list of allowed metrics."
+                "metric not allowed. See documentation for list of allowed"
+                "metrics."
             )
         
         self.batch_size = kwargs.pop('batch_size', 100)
@@ -102,8 +112,8 @@ class BatchUncertaintySampling(Query):
         """
         Calculates uncertainty and similarity scores which
         are used in make_query() to calculate a new weighted score
-        combining the dissimilarity in X_pool and X_training and our uncertainty
-        scores for the unlabeled data.
+        combining the dissimilarity in X_pool and X_training and our 
+        uncertainty scores for the unlabeled data.
         """
         dataset = self.dataset
         self.model.train(dataset)
@@ -118,9 +128,9 @@ class BatchUncertaintySampling(Query):
         elif isinstance(self.model, ContinuousModel):
             dvalue = self.model.predict_real(X_pool)
             
-        if self.method == 'lc': # least confident
+        if self.method == 'lc':  # least confident
             uncertainty_scores = -np.max(dvalue, axis=1)
-        elif self.method == 'sm': # smallest margin
+        elif self.method == 'sm':  # smallest margin
             if np.shape(dvalue)[1] > 2:
                 # find 2 largest decision values
                 dvalue = -(np.partition(-dvalue, 2, axis=1)[:, :2])
@@ -131,7 +141,7 @@ class BatchUncertaintySampling(Query):
         # Calculate similarity scores
         # TODO batch size needs to be tunable parameter that
         # is optimized for different data dimensions
-        bs = 10000 
+        bs = 10000
         if n_unlabeled > bs:
             # compute batched pairwise distance
             distance_scores = None
@@ -161,23 +171,22 @@ class BatchUncertaintySampling(Query):
                                                 distance_scores_batch)
         else:
             if self.n_jobs == 1 or self.n_jobs is None:
-                    _, distance_scores= pairwise_distances_argmin_min(
-                        X_pool,
-                        X_train,
-                        metric=self.metric
-                        )
-                else:
-                    distance_scores = pairwise_distances(
-                        X_pool,
-                        X_train,
-                        metric=self.metric,
-                        n_jobs=self.n_jobs
-                        ).min(axis=1)         
+                _, distance_scores = pairwise_distances_argmin_min(
+                    X_pool,
+                    X_train,
+                    metric=self.metric
+                    )
+            else:
+                distance_scores = pairwise_distances(
+                    X_pool,
+                    X_train,
+                    metric=self.metric,
+                    n_jobs=self.n_jobs
+                    ).min(axis=1)        
         similarity_scores = 1 / (1 + distance_scores)
         
         return uncertainty_scores, similarity_scores
-                
-        
+                     
     def make_query(self):
         """
         Selects entry from unlabeled entries for labeling.
@@ -189,7 +198,7 @@ class BatchUncertaintySampling(Query):
         Parameters
         ----------
         similarity_scores: array-like
-            Similarity (minimum pairwise distance) between unlabeled 
+            Similarity (minimum pairwise distance) between unlabeled
             (or already picked) observations and labeled observations.
         uncertainty_scores: array-like
             Uncerainty scores for unlabeled data calculated from
@@ -219,10 +228,10 @@ class BatchUncertaintySampling(Query):
         for _ in range(ceiling):
             
             # Determine our alpha parameter (weight for scores)
-            alpha = n_unlabeled / (n_unlabeled + n_labeled_records)
+            alpha = n_unlabeled / (n_unlabeled + n_labeled)
 
             # calculate scores
-            scores = alpha * (1 - similarity_scores[mask]) + 
+            scores = alpha * (1 - similarity_scores[mask]) + \
                 (1 - alpha) * uncertainty_scores[mask]
 
             # Find index of the best unlabeled sample to be queried
@@ -246,8 +255,10 @@ class BatchUncertaintySampling(Query):
             # Because the distance to itself will be zero, we can ensure
             # next iteration won't redraw the same sample without having
             # to modify the dataset
-            similarity_scores = np.max([similarity_scores, 1 / (1 + distance_to_labeled)],
-                                       axis=0)
+            similarity_scores = np.max(
+                [similarity_scores, 1 / (1 + distance_to_labeled)],
+                axis=0
+                )
             
             # Append queried sample to batch list
             batch_ask_ids.append(ask_id)
