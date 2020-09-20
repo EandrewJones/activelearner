@@ -55,12 +55,11 @@ def batch_mode(data, keywords, querier, oracle, save_every,
     
     # Query oracle for labels
     for _, query_id in enumerate(query_ids):
-        label = oracle.label(data.view[query_id],
-                                 keywords=keywords)
+        label = oracle.label(data.view[query_id], keywords=keywords)
         data.update(query_id, label)
 
         progress = (_ + 1) / len(query_ids)
-        if print_progress and progress % save_every == 0:
+        if print_progress and (progress % save_every) == 0:
             # show progress
             update_progress(progress)
             data.get_dataset_stats()

@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import (
     pairwise_distances,
     pairwise_distances_argmin_min
 )
-from activealearner.interfaces import (
+from activelearner.interfaces import (
     Query,
     ContinuousModel,
     ProbabilisticModel
