@@ -48,27 +48,23 @@ def interactive_mode(data, keywords, querier, oracle, save_every,
 
 
 def batch_mode(data, keywords, querier, oracle, save_every, 
-               path, file_name, print_progress):
+               path, file_name):
     '''Implements loop for batch labeling.'''
     # Get batch of ids to query
     query_ids = querier.make_query()
     
     # Query oracle for labels
     for _, query_id in enumerate(query_ids):
+        print('Query {} / {} in batch.\n'.format(_, len(query_ids)))
         label = oracle.label(data.view[query_id], keywords=keywords)
         data.update(query_id, label)
 
-        progress = (_ + 1) / len(query_ids)
-        if print_progress and (progress % save_every) == 0:
-            # show progress
-            update_progress(progress)
-            data.get_dataset_stats()
-            
-            # save progress
+        # save progress
+        if _  % save_every == 0:        
             print('Saving progress...')
             fname = os.path.join(path, '', file_name)
             utils.save_object(obj=data, filename=fname)     
-    
+
 
 # Main function for active_learner algorithm
 def run_active_learner(mode, data, querier, feature_type, label_name,
@@ -173,4 +169,4 @@ def run_active_learner(mode, data, querier, feature_type, label_name,
     if mode == 'batch':
         batch_mode(data=data, keywords=keywords, querier=querier,
                    oracle=oracle, save_every=save_every, path=path,
-                   file_name=file_name, print_progress=print_progress)
+                   file_name=file_name)
