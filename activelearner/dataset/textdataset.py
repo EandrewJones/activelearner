@@ -68,8 +68,8 @@ class TextDataset(Dataset):
         self._uniq_tokens = uniq_tokens
         self._n_uniq_tokens = n_uniq_tokens
 
-        vectorized_ttws = np.vectorize(text_to_word_sequence)
-        tokenized_docs = vectorized_ttws(self._X)
+        doc_list = list(self._X)
+        tokenized_docs = doc_list.apply(lambda x: text_to_word_sequence(x))
         self._optimal_seq_length = optimal_seq_length(tokenized_docs)
 
     def bag_of_words(self, *args, **kwargs):
