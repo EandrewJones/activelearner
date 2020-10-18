@@ -9,6 +9,7 @@ import numpy as np
 import re
 import psutil
 import scipy.sparse as sp
+
 from scipy.spatial import ConvexHull
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -19,7 +20,10 @@ from sklearn.manifold import TSNE
 from spacy.lang.en.stop_words import STOP_WORDS
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from keras_preprocessing.text import text_to_word_sequence
+from sentence_transformers import SentenceTransformer
+from torch import 
 from activelearner.interfaces import Dataset
+
 
 #=========#
 # Classes #
@@ -34,8 +38,8 @@ class TextDataset(Dataset):
     for:
         1) BoW
         2) doc2vec
-        
-        # TODO implement a range of options useing sentence-transformers package
+        3) Spectral NMF
+        4) Any embedding model included in the sentence-transformers package
 
     Parameters
     ----------
@@ -64,6 +68,9 @@ class TextDataset(Dataset):
         uniq_tokens, n_uniq_tokens = unique_tokens(self._X)
         self._uniq_tokens = uniq_tokens
         self._n_uniq_tokens = n_uniq_tokens
+
+        tokenized_docs = self._X.apply(lambda x: text_to_word_sequence(x))
+        self._optimal_seq_length = optimal_seq_length(tokenized_docs)
 
     def bag_of_words(self, *args, **kwargs):
         """
@@ -262,6 +269,68 @@ class TextDataset(Dataset):
             doc_vecs[i, ] = model.docvecs[i]
 
         self._X = doc_vecs
+        
+    def transformer(self, model, **kwargs):
+        """
+        Transform sample documents (X) into document-level embeddings using pre-trained
+        models from the SentenceTransformer module or your own custom sentence-transformer
+        model.
+        
+        Parameters
+        ----------
+        model: str
+            Either the name of a pre-trained sentence transformer model or the path to a local
+            pretrained sentence transformer model. Available pre-trained models are listed at
+            https://www.sbert.net/docs/pretrained_models.html. The 'best' model will depend
+            on use case, and the desired trade off between computational cost and performance.
+            
+        device: str, (default='cuda')
+            By default, the function will search for Cuda-enabled GPUs and use the most powerful
+            device available for computation. Otherwise, cpu will be used. If the dataset is 
+            large, reaching CPU/memory limits is likely, and the user will be warned.
+            
+        seq_length: int, (default=128)
+            The number of allowed word pieces used for each embedding. Transformer models like 
+            BERT / RoBERTa / DistilBERT etc. the runtime and the memory requirement grows quadratic 
+            with the input length. A common value for BERT models is 512, which roughly equates to
+            300-400 (English) words.
+        
+        batch_size: int, (default=32)
+            Number of documents to process per batch. Small batches use less memory, but will take
+            longer. Conversely, larger batches will run faster, but consume larger memory.
+            
+        show_progress_bar: bool, (default=False)
+            Whether to print the progess of encoder.
+    
+        """
+        
+        # Argument checks
+        if model is None:
+            ValueError('model name or path must be provided.')
+        device = kwargs.pop('device', None)
+        seq_length = kwargs.pop('seq_length', 128)
+        batch_size = kwargs.pop('batch_size', 32)
+        show_progress_bar = kwargs.pop('show_progress_bar', False)
+        
+        # Create model
+        print('# ================================ #')
+        print('Instantiating ' + model + ' model.')
+        model = SentenceTransformer(model_name_or_path=model, device=device)
+        
+        
+        # set optimal sequence length
+        print('Setting max sequence length to: ' + self._optimal_seq_length)
+        model.max_seq_length = self._optimal_seq_length
+        
+        # Create embeddings
+        print('Starting encoder with batch size: ' + batch_size)
+        doc_list = self._X.tolist()
+        embeddings = model.encode(sentences=doc_list,
+                                  batch_size=batch_size,
+                                  show_progress_bar=show_progress_bar)
+        print('Complete!')
+        print('# ================================ #')
+        self._X = embeddings
 
 
 #===========#
@@ -323,6 +392,21 @@ def unique_tokens(corpus):
         uniq_tokens.update(doc)
 
     return uniq_tokens, len(uniq_tokens)
+
+
+def optimal_seq_length(tokenized_list):
+    """Takes tokenized list of documents and returns optimal sequence length."""
+    
+    # Calculate lengths
+    lengths = [len(doc) for doc in tokenized_list]
+    quants = np.quantile(lengths, q=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1])
+    
+    # Calculate optimal sequence length
+    seq_lenths = [32, 64, 128, 256, 512]
+    distances = [[[abs(q - l) for l in seq_lengths] for q in quants]]
+    optimal = np.mean(distances, axis=1).argmin()
+    
+    return(seq_length[optimal])
 
 
 def gram_rp(dtm, s=.05, p=3000, d_group_size=2000):

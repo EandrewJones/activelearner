@@ -55,12 +55,12 @@ def batch_mode(data, keywords, querier, oracle, save_every,
     
     # Query oracle for labels
     for _, query_id in enumerate(query_ids):
-        print('Query {} / {} in batch.\n'.format(_, len(query_ids)))
+        print('Query {} / {} in batch.\n'.format(_ + 1, len(query_ids)))
         label = oracle.label(data.view[query_id], keywords=keywords)
         data.update(query_id, label)
 
         # save progress
-        if _  % save_every == 0:        
+        if (_ + 1)  % save_every == 0:        
             print('Saving progress...')
             fname = os.path.join(path, '', file_name)
             utils.save_object(obj=data, filename=fname)     
