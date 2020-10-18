@@ -21,7 +21,6 @@ from spacy.lang.en.stop_words import STOP_WORDS
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from keras_preprocessing.text import text_to_word_sequence
 from sentence_transformers import SentenceTransformer
-from torch import 
 from activelearner.interfaces import Dataset
 
 
