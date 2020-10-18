@@ -18,7 +18,7 @@ strategies
 
 __author__ = """Evan Andrew Jones"""
 __email__ = 'evan.a.jones3@gmail.com'
-__version__ = '0.2.2'
+__version__ = '0.3.0'
 
 import activelearner.dataset
 import activelearner.interfaces
