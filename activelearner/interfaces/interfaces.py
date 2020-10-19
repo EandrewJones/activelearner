@@ -33,6 +33,7 @@ Options included for exporting to formats supported by
 scikit-learn and scipy
 '''
 class Dataset(object): 
+    # TODO add method to predict and reappend data in place within ds object
     """
     Dataset object for storing feature and labels
     
@@ -66,7 +67,7 @@ class Dataset(object):
             X = np.array(X)
             
         if y is None:
-            y = [None]
+            y = [None] * len(X)
         y = np.array(y)
         
         self._X = X

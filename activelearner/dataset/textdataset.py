@@ -319,11 +319,11 @@ class TextDataset(Dataset):
         
         
         # set optimal sequence length
-        print('Setting max sequence length to: {}'.format(seq_length)
+        print('Setting max sequence length to: {}'.format(seq_length))
         model.max_seq_length = seq_length
         
         # Create embeddings
-        print('Starting encoder with batch size: {batch_size}')
+        print('Starting encoder with batch size: {}'.format(batch_size))
         doc_list = self._X.tolist()
         embeddings = model.encode(sentences=doc_list,
                                   batch_size=batch_size,
