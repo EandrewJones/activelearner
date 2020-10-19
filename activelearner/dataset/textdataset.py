@@ -289,11 +289,11 @@ class TextDataset(Dataset):
             device available for computation. Otherwise, cpu will be used. If the dataset is 
             large, reaching CPU/memory limits is likely, and the user will be warned.
             
-        seq_length: int, (default=128)
+        seq_length: int,
             The number of allowed word pieces used for each embedding. Transformer models like 
             BERT / RoBERTa / DistilBERT etc. the runtime and the memory requirement grows quadratic 
             with the input length. A common value for BERT models is 512, which roughly equates to
-            300-400 (English) words.
+            300-400 (English) words. Defaults to an optimal value that balances coverage and performance.
         
         batch_size: int, (default=32)
             Number of documents to process per batch. Small batches use less memory, but will take
@@ -308,7 +308,7 @@ class TextDataset(Dataset):
         if model is None:
             ValueError('model name or path must be provided.')
         device = kwargs.pop('device', None)
-        seq_length = kwargs.pop('seq_length', 128)
+        seq_length = kwargs.pop('seq_length', self._optimal_seq_length)
         batch_size = kwargs.pop('batch_size', 32)
         show_progress_bar = kwargs.pop('show_progress_bar', False)
         
@@ -319,11 +319,11 @@ class TextDataset(Dataset):
         
         
         # set optimal sequence length
-        print('Setting max sequence length to: ' + self._optimal_seq_length)
-        model.max_seq_length = self._optimal_seq_length
+        print('Setting max sequence length to: {}'.format(seq_length)
+        model.max_seq_length = seq_length
         
         # Create embeddings
-        print('Starting encoder with batch size: ' + batch_size)
+        print('Starting encoder with batch size: {batch_size}')
         doc_list = self._X.tolist()
         embeddings = model.encode(sentences=doc_list,
                                   batch_size=batch_size,
