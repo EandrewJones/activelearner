@@ -69,7 +69,7 @@ class TextDataset(Dataset):
         self._n_uniq_tokens = n_uniq_tokens
 
         doc_list = list(self._X)
-        tokenized_docs = doc_list.apply(lambda x: text_to_word_sequence(x))
+        tokenized_docs = [text_to_word_sequence(doc) for doc in doc_list]
         self._optimal_seq_length = optimal_seq_length(tokenized_docs)
 
     def bag_of_words(self, *args, **kwargs):
@@ -402,11 +402,11 @@ def optimal_seq_length(tokenized_list):
     quants = np.quantile(lengths, q=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1])
     
     # Calculate optimal sequence length
-    seq_lenths = [32, 64, 128, 256, 512]
+    seq_lengths = [32, 64, 128, 256, 512]
     distances = [[[abs(q - l) for l in seq_lengths] for q in quants]]
     optimal = np.mean(distances, axis=1).argmin()
     
-    return(seq_length[optimal])
+    return(seq_lengths[optimal])
 
 
 def gram_rp(dtm, s=.05, p=3000, d_group_size=2000):
