@@ -93,4 +93,4 @@ class AskOracle(Labeler):
             print('Invalid label, please re-enter the associated label.')
             lbl = input(banner)
 
-        return self.label_name.index(lbl)
+        return lbl
