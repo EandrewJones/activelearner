@@ -11,7 +11,7 @@ before_install:
   - python -m pip install --upgrade pip
 install: 
   - pip install -U tox-travis
-  - pip install -r requirements.txt --use-feature=2020-resolver
+  - pip install -r requirements_dev.txt --use-feature=2020-resolver
   - pip install .
 script: tox -v
 deploy:
