@@ -7,7 +7,7 @@ python:
 before_install:
 - sudo apt-get -qq update
 install: pip install -U tox-travis
-script: tox
+script: tox -v
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
