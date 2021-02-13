@@ -5,7 +5,7 @@ python:
 - 3.6
 - 3.5
 before_install:
-- sude apt-get -qq update
+- sudo apt-get -qq update
 install: pip install -U tox-travis
 script: tox
 deploy:
