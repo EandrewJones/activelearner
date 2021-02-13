@@ -1,3 +1,5 @@
+os: linux
+dist: xenial
 language: python
 python:
 - 3.8
@@ -5,8 +7,12 @@ python:
 - 3.6
 - 3.5
 before_install:
-- sudo apt-get -qq update
-install: pip install -U tox-travis
+  - sudo apt-get -qq update
+  - python -m pip install --upgrade pip
+install: 
+  - pip install -U tox-travis
+  - pip install -r requirements.txt --use-feature=2020-resolver
+  - pip install .
 script: tox -v
 deploy:
   provider: pypi
