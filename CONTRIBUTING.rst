@@ -4,8 +4,11 @@
 Contributing
 ============
 
-Contributions are welcome, and they are greatly appreciated! Every little bit
-helps, and credit will always be given.
+`ActiveLearner` is still in beta testing and lacks a test suite. Until a test suite is implemented,
+contributions may be limited to reporting and fixing bugs. New features will be tabled until they can be
+tested.
+
+Contributions are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
 
 You can contribute in many ways:
 

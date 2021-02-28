@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'ActiveLearner'
-copyright = "2020, Evan Andrew Jones"
+copyright = "2021, Evan Andrew Jones"
 author = "Evan Andrew Jones"
 
 # The version info for the project you're documenting, acts as replacement

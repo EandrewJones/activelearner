@@ -4,24 +4,10 @@
 Installation
 ============
 
+Stable
+------
 
-Stable release
---------------
-
-To install ActiveLearner, run this command in your terminal:
-
-.. code-block:: console
-
-    $ pip install activelearner
-
-This is the preferred method to install ActiveLearner, as it will always install the most recent stable release.
-
-If you don't have `pip`_ installed, this `Python installation guide`_ can guide
-you through the process.
-
-.. _pip: https://pip.pypa.io
-.. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
-
+There currently is not a stable PyPi release.
 
 From sources
 ------------
@@ -40,11 +26,17 @@ Or download the `tarball`_:
 
     $ curl -OJL https://github.com/EandrewJones/activelearner/tarball/master
 
-Once you have a copy of the source, you can install it with:
+
+
+Once you have a copy of the source, it is recommended that you create a 
+virtual environment with python >= 3.7. Then run teh following:
+
+you can install it with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ cd activelearner
+    $ pip install -r requirements.txt
 
 
 .. _Github repo: https://github.com/EandrewJones/activelearner
