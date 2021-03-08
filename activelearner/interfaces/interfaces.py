@@ -59,7 +59,7 @@ class Dataset(object):
         original state of features for Oracle to view despite possible 
         feature engineering.
     
-    """
+    """sp.csr_ma
     def __init__(self, X=None, y=None):
         if X is None: 
             X = np.array([])
@@ -161,6 +161,28 @@ class Dataset(object):
         
         self.modified = True
         return len(self) - 1
+    
+    def add_feature(self, feature):
+        """
+        Add one or more feature columns to the already instantiated
+        feature sample set, X.
+        
+        Parameters
+        ----------
+        feature: {array-like}, shape = (n_samples, :)
+            A new column or matrix of feature columns to add to X.
+            
+        Returns
+        -------
+        n_features: {int}
+            New number of feature columns.
+        """
+        if isinstance(self._X, np.ndarray):
+            self._X = np.hstack([self._X, feature])
+        else:
+            self._X = sp.hstack([self._X, feature])
+        self.modified = True
+        return self._X.shape[1]
     
     def update(self, entry_id, new_label):
         """
