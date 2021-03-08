@@ -59,7 +59,7 @@ class Dataset(object):
         original state of features for Oracle to view despite possible 
         feature engineering.
     
-    """sp.csr_ma
+    """
     def __init__(self, X=None, y=None):
         if X is None: 
             X = np.array([])
